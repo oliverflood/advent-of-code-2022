@@ -4,6 +4,5 @@
 using namespace std;
 
 int main() {
-  assert(true);
-  cout << "hello world" << endl;
+  cout << "Hello World" << endl;
 }
