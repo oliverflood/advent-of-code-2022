@@ -2,7 +2,7 @@
 CC=g++
 
 # good for any file
-#src = $(wildcard *.cpp)
+# src = $(wildcard *.cpp)
 obj = $(src:.cpp=.o)
 
 LDFLAGS = -lm
