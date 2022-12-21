@@ -47,6 +47,8 @@ void interval_union(vector<pair<int, int>> &intervals) {
 	}
 }
 
+
+
 const int Y_VALUE = 2000000;
 
 int main() {
