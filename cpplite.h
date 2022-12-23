@@ -48,6 +48,7 @@ void print(vector<string> v, string s);
 
 
 vector<int> vtoi(vector<string> v);
+vector<long long> vtoll(vector<string> v);
 vector<string> split(string s, string delimiter);
 
 

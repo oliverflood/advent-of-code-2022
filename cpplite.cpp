@@ -211,6 +211,16 @@ vector<int> vtoi(vector<string> v) {
 	return v2;
 }
 
+// changes string vector to ll vector
+vector<long long> vtoll(vector<string> v) {
+	vector<long long> v2;
+	for (int i = 0; i < v.size(); ++i)
+	{
+		v2.push_back(stoll(v[i]));
+	}
+	return v2;
+}
+
 // splits string by delimiter
 // vector<string> split(string s, string delimiter) {
 // 	vector<string> v;

@@ -8,22 +8,10 @@ g++ day16a.cpp cpplite.cpp -o day16a.exe
 */
 // last char not working???
 
-// 30 mins total
-
 // final answer
 int ans = 0;
 //             <pressure, rate>
 // map<string, pair<pair<int, int>, int>> current_top; // cut off any connections at a node that are slower and lower
-
-
-// IDEAS:
-// per minute per pipe ~30*35 different paths
-// go minute by minute advancing 35 paths
-// ASSUMPTION:
-// fastest path in the same place at same time will always be better than any other same place same time
-
-
-// TAKES A MINUTE TO RUN BUT I DID PART 1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
       // place   time  pressure
