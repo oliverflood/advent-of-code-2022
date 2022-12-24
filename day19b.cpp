@@ -32,7 +32,7 @@ struct game {
 	string debug = "";
 };
 
-const int MINUTES = 24;
+const int MINUTES = 32;
 
 void blueprint_setup(vector<blueprint> &blueprints);
 void print_blueprint(blueprint b);
@@ -51,13 +51,23 @@ int top_geode_robots = 0;
 int top_obsidian = 0;
 int top_obsidian_robots = 0;
 
-void robot_options(blueprint blueprint, vector<game> games, vector<game> &new_games, game game1) {
+void add_game(map<vector<int>, game> &new_games, game next_game) {
+	if (new_games[{next_game.ore_robots, next_game.clay_robots, next_game.obsidian_robots, next_game.geode_robots}].geode <= next_game.geode) {
+		new_games[{next_game.ore_robots, next_game.clay_robots, next_game.obsidian_robots, next_game.geode_robots}] = next_game;
+	}
+	if (new_games[{next_game.ore_robots, next_game.clay_robots, next_game.obsidian_robots, next_game.geode_robots}].obsidian <= next_game.obsidian) {
+		new_games[{next_game.ore_robots, next_game.clay_robots, next_game.obsidian_robots, next_game.geode_robots}] = next_game;
+	}
+}
+
+void robot_options(blueprint blueprint, map<vector<int>, game> games, map<vector<int>, game> &new_games, game game1) {
 
 	// buy geode
 	if ((game1.ore >= blueprint.geode_cost.first && game1.obsidian >= blueprint.geode_cost.second
 		&& game1.ore-game1.ore_robots < blueprint.geode_cost.first) || 
 		(game1.ore >= blueprint.geode_cost.first && game1.obsidian >= blueprint.geode_cost.second
 		&& game1.obsidian-game1.obsidian_robots < blueprint.geode_cost.second)) {
+	//if (game1.ore >= blueprint.geode_cost.first && game1.obsidian >= blueprint.geode_cost.second) {
 		game next_game = game1;
 
 		// consume materials
@@ -69,9 +79,9 @@ void robot_options(blueprint blueprint, vector<game> games, vector<game> &new_ga
 
 		// finish creating robot
 		next_game.geode_robots++;
-		new_games.push_back(next_game);
+		add_game(new_games, next_game);
 	}
-	else {
+	//else {
 
 	// buy obsidian
 	if ((game1.ore >= blueprint.obsidian_cost.first && game1.clay >= blueprint.obsidian_cost.second
@@ -90,9 +100,8 @@ void robot_options(blueprint blueprint, vector<game> games, vector<game> &new_ga
 
 		// finish creating robot
 		next_game.obsidian_robots++;
-		new_games.push_back(next_game);
+		add_game(new_games, next_game);
 	}
-	else {
 
 	// buy ore
 	if (game1.ore >= blueprint.ore_cost && game1.ore-game1.ore_robots < blueprint.ore_cost) {
@@ -107,7 +116,7 @@ void robot_options(blueprint blueprint, vector<game> games, vector<game> &new_ga
 
 		// finish creating robot
 		next_game.ore_robots++;
-		new_games.push_back(next_game);
+		add_game(new_games, next_game);
 	}
 
 	// buy clay
@@ -122,25 +131,23 @@ void robot_options(blueprint blueprint, vector<game> games, vector<game> &new_ga
 
 		// finish creating robot
 		next_game.clay_robots++;
-		new_games.push_back(next_game);
+		add_game(new_games, next_game);
 	}
 
 
 	
-
 	mine_materials(game1);
-	new_games.push_back(game1);
-	}
-	}
+	add_game(new_games, game1);
+	//}
 }
 
-game max_geode_count(vector<game> games) {
+game max_geode_count(map<vector<int>, game> games) {
 	game ans;
 
-	for (int i = 0; i < games.size(); ++i)
+	for (auto & [robot_nums, game1] : games)
 	{
-		if (games[i].geode >= ans.geode){
-			ans = games[i];
+		if (game1.geode >= ans.geode){
+			ans = game1;
 		}
 	}
 
@@ -150,38 +157,39 @@ game max_geode_count(vector<game> games) {
 
 int largest_geodes(blueprint b) {
 	game starter;
-	vector<game> games;
-	games.push_back(starter);
+	//vector<game> games;
+	map<vector<int>, game> games;
+	games[{starter.ore_robots, starter.clay_robots, starter.obsidian_robots, starter.geode_robots}] = starter;
 
 	for (int i = 1; i <= MINUTES; ++i)
 	{
-		vector<game> new_games;
-		for (int k = 0; k < games.size(); ++k)
+		map<vector<int>, game> new_games;
+		if (i%4 == 0)
+			cout << "minutes: " << i << "  size: " << games.size() << endl;
+		for (auto & [robot_nums, game1] : games)
 		{
-			if (top_geode_robots > 0) {
-				if (games[k].geode < top_geodes && games[k].geode_robots < top_geode_robots)
-					continue;
-			}
-			else {
-				if (games[k].obsidian < top_obsidian && games[k].obsidian_robots < top_obsidian)
-					continue;
-			}
+			// if (top_geode_robots > 0) {
+			// 	if (games[k].geode < top_geodes && games[k].geode_robots < top_geode_robots)
+			// 		continue;
+			// }
+			// else {
+			// 	if (games[k].obsidian < top_obsidian && games[k].obsidian_robots < top_obsidian)
+			// 		continue;
+			// }
 
-			if (games[k].geode > top_geodes)
-				top_geodes = games[k].geode;
-			if (games[k].geode_robots > top_geode_robots)
-				top_geode_robots = games[k].geode_robots;
+			// if (games[k].geode > top_geodes)
+			// 	top_geodes = games[k].geode;
+			// if (games[k].geode_robots > top_geode_robots)
+			// 	top_geode_robots = games[k].geode_robots;
 
-			if (games[k].obsidian > top_obsidian)
-				top_geodes = games[k].obsidian;
-			if (games[k].obsidian_robots > top_obsidian_robots)
-				top_obsidian_robots = games[k].obsidian_robots;
+			// if (games[k].obsidian > top_obsidian)
+			// 	top_geodes = games[k].obsidian;
+			// if (games[k].obsidian_robots > top_obsidian_robots)
+			// 	top_obsidian_robots = games[k].obsidian_robots;
 
-			robot_options(b, games, new_games, games[k]);
+			robot_options(b, games, new_games, game1);
 		}
 		games = new_games;
-		// printf("num games at turn %d is %d\n", i, games.size());
-		// print_game(games[0]);
 	}
 
 	printf("LARGEST GEODE GAME:\n");
@@ -207,8 +215,18 @@ int main() {
 	}
 
 
-	int answer = 0;
-	for (int i = 1; i <= blueprints.size(); ++i)
+	/*
+	LMAO ok so on the test input I was getting different answers for using map trimmming strategy
+	vs using vector trimming strategy (what I did for part a, which runs suprisingly fast (<1sec)
+	with 32 mins) so I just decided to combine my highest geode answers from both strategies for
+	part b and it worked lolololololol
+	
+	Ok ok I will have to come back and do this one properly, probably still do map trimming but just
+	a little differently, or fix vector trimming from part a to not undershoot sometimes
+	*/
+
+	int answer = 1;
+	for (int i = 1; i <= 3; ++i)
 	{
 		cout << "starting game " << i << endl;
 		top_geodes = 0;
@@ -216,10 +234,12 @@ int main() {
 		top_obsidian = 0;
 		top_geode_robots = 0;
 		int l = largest_geodes(blueprints[i-1]);
-		cout << "ANSWER FOR NUMBER " << i << " IS " << l << endl;
-		answer += i*l;
+		answer *= l;
+		cout << "ANSWER FOR NUMBER " << i << "  " << l << endl;
 	}
 	printf("answer: %d\n", answer);
+
+	//5814
 
 }
 

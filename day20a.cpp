@@ -9,71 +9,104 @@ using namespace std;
 g++ day20a.cpp cpplite.cpp -o day20a.exe -std=c++1z
 */
 
+void print_grove(vector<int> grove, map<int, int> movement_info);
+void move(vector<int> &grove, map<int, int> movement_info, int item);
+void mix(vector<int> &grove, map<int, int> movement_info);
+void input_setup(vector<int> &grove, map<int, int> &movement_info, vector<int> file);
+int sum_coordinates(vector<int> grove, map<int, int> movement_info);
 
 
-void move(vector<ll> &file, ll n) {
 
-	cout << "moving " << n << endl;
-	
-	auto it = find(file.begin(), file.end(), n);
-	assert(it != file.end());
-
-	ll index = it - file.begin();
-
-	int e = 0;
-	if (n > 0)
-		e = 1;
-
-
-	file.insert(file.begin() + ((index + n+e + file.size()) % file.size()), n);
-
-	for (int i = 0; i < file.size(); ++i)
-		cout << file[i] << " ";
-	cout << endl;
-
-
-	if ((index + n+e) % file.size() > index)
-		file.erase(file.begin() + index);
-	else
-		file.erase(file.begin() + index + 1);
-
-	for (int i = 0; i < file.size(); ++i)
-		cout << file[i] << " ";
-	cout << endl;
-
-}
 
 int main() {
 
-	vector<ll> file = vtoll(slurp());
+	vector<int> file = vtoi(slurp());
+	map<int, int> movement_info; // the original values
+	vector<int> grove; // unique identifier [0, size] for each elem
 
-	// for (int i = 0; i < file.size(); ++i)
-	// {
-	// 	cout << file[i] << endl;
-	// }
+	// input setup
+	input_setup(grove, movement_info, file);
 
-	// 1st thing in list only changes when 1st thing in list moves, changes to 2th thing
-	// zero doesn't moves
-	// pos of zero changes when elements in [first, 0) move to (0, first)
-	// way stuff moves depends on sign and size -> this can be used
+	// mix once
+	mix(grove, movement_info);
 
-	// nvm, guessing its just easy
-
-
-	for (int i = 0; i < file.size(); ++i)
-		cout << file[i] << " ";
-	cout << endl;
+	// answer
+	printf("final grove: \n");
+	print_grove(grove, movement_info);
+	printf("ans: %d", sum_coordinates(grove, movement_info));
+}
 
 
-	vector<ll> order = file;
 
-	for (int i = 0; i < order.size(); ++i)
+
+void mix(vector<int> &grove, map<int, int> movement_info) {
+	for (int i = 0; i < grove.size(); ++i)
 	{
-		move(file, order[i]);
+		move(grove, movement_info, i);
+	}
+}
+
+void print_grove(vector<int> grove, map<int, int> movement_info) {
+	for (int i = 0; i < grove.size(); ++i)
+	{
+		cout << movement_info[grove[i]] << " ";
+	}
+	cout << endl;
+}
+
+
+void move(vector<int> &grove, map<int, int> movement_info, int item) {
+	
+	// find index of item to move
+	int item_index = find(grove.begin(), grove.end(), item)-grove.begin();
+
+	// rotate to get element in front
+	rotate(grove.begin(), grove.begin() + item_index, grove.end());
+	
+	// find new index of item
+	int new_index = movement_info[item];
+
+	// normalize to bounds of [0, grove.size()-1)
+	while(new_index < 0)
+		new_index += grove.size()-1;
+	new_index = new_index % (grove.size()-1);
+
+	// remove item
+	grove.erase(grove.begin());
+
+	// re-insert item
+	grove.insert(grove.begin() + new_index, item);
+}
+
+
+void input_setup(vector<int> &grove, map<int, int> &movement_info, vector<int> file) {
+	for (int i = 0; i < file.size(); ++i)
+	{
+		grove.push_back(i);
+		movement_info[i] = file[i];
+	}
+}
+
+
+int sum_coordinates(vector<int> grove, map<int, int> movement_info) {
+
+	// find element which has movement info equal to zero
+	int elem;
+	for (auto & [key, value] : movement_info) {
+		if (value == 0)
+			elem = key;
 	}
 
-	for (int i = 0; i < file.size(); ++i)
-		cout << file[i] << " ";
-	
+	// find index of zero(info value) element
+	int item_index = find(grove.begin(), grove.end(), elem) - grove.begin();
 
+	// rotate to get zero(info value) element in front
+	rotate(grove.begin(), grove.begin() + item_index, grove.end());
+
+	// calculate our answer
+	int ans = movement_info[grove[1000 % grove.size()]];
+	ans += movement_info[grove[2000 % grove.size()]];
+	ans += movement_info[grove[3000 % grove.size()]];
+
+	return ans;
 }
